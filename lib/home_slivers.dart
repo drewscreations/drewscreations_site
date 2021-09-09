@@ -4,15 +4,46 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HomeSlivers extends StatelessWidget {
+class HomeSlivers extends StatefulWidget {
+  @override
+  _HomeSliversState createState() => _HomeSliversState();
+}
+
+class _HomeSliversState extends State<HomeSlivers> {
+  //
+  //Define state variables
+  //
+  TextStyle normalText = TextStyle(
+      height: 1.4, letterSpacing: 0.3, color: Colors.black.withOpacity(0.9));
+  TextStyle boldText = TextStyle(
+      height: 1.4,
+      letterSpacing: 0.3,
+      color: Colors.black.withOpacity(0.9),
+      fontWeight: FontWeight.bold);
+  TextStyle dividerText = TextStyle(
+      height: 1.4,
+      letterSpacing: 0.3,
+      fontSize: 30,
+      color: Colors.black.withOpacity(0.9),
+      fontWeight: FontWeight.bold);
   SliverAppBar nameSliver = SliverAppBar();
   List projectCards = [];
   List jobCards = [];
-  SliverAppBar aboutMeSliver = SliverAppBar();
+  SliverList aboutMeSliver = SliverList(delegate: SliverChildListDelegate([]));
   SliverList jobsSliver = SliverList(delegate: SliverChildListDelegate([]));
   SliverList projectsSliver = SliverList(delegate: SliverChildListDelegate([]));
   SliverList informationSliver =
       SliverList(delegate: SliverChildListDelegate([]));
+  SliverList sliverSeperator(String text) {
+    return SliverList(
+        delegate: SliverChildListDelegate([
+      Card(
+        child: Align(
+            alignment: Alignment.center, child: Text(text, style: dividerText)),
+        color: Colors.grey[200],
+      )
+    ]));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,90 +60,122 @@ class HomeSlivers extends StatelessWidget {
           StretchMode.fadeTitle
         ],
         centerTitle: true,
-        title: RichText(
-            text: TextSpan(children: [
-          TextSpan(text: "Full Stack Web, Hardware Test Engineer, Physics"),
-          TextSpan(text: "Drew Olson", style: TextStyle()),
-        ])),
+        title: Align(
+            alignment: Alignment.center,
+            child: RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: "Full Stack Web, Hardware Test Engineer, Physics\n",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                TextSpan(
+                    text: "Drew Olson",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              ]),
+              textAlign: TextAlign.center,
+            )),
         background: Stack(fit: StackFit.expand, children: [
           const DecoratedBox(
               decoration: BoxDecoration(
                   gradient: LinearGradient(
-                      begin: Alignment(0.0, 0.5),
+                      begin: Alignment(0.0, 1),
                       end: Alignment(0.0, 0.0),
-                      colors: <Color>[Colors.cyan, Colors.cyanAccent])))
+                      colors: <Color>[Colors.white12, Colors.white60])))
         ]),
       ),
     );
+    //
+    //Project Section Chips, Cards, Sliver
+    //
     for (var rawProject in myProjects) {
       Project project = Project.fromJson(rawProject);
       List apiChips = [
         ...project.apis.split(",").map((e) => Chip(
               label: Text(e),
-              backgroundColor: Colors.blue[100],
+              backgroundColor: Colors.pink[300]!.withOpacity(0.3),
             ))
       ];
       List languageChips = [
         ...project.languages.split(",").map((e) => Chip(
               label: Text(e),
-              backgroundColor: Colors.green[100],
+              backgroundColor: Colors.yellow[600]!.withOpacity(0.3),
             ))
       ];
       projectCards.add(Card(
-          child: Column(children: <Widget>[
-        ListTile(
-            leading: Icon(IconData(project.icon, fontFamily: "MaterialIcons")),
-            title: Text(project.name),
-            subtitle: Text(project.description)),
-        Row(children: [Text("Languages used: "), ...languageChips]),
-        Row(children: [Text("APIs used: "), ...apiChips.take(3)]),
-        /*
-        ListView(
-          scrollDirection: Axis.horizontal,
-          children: [...apiChips],
-          shrinkWrap: true,
-        ),
-        */
-        Row(
-          children: [
-            Text('Github: '),
-            RichText(
-              text: TextSpan(
-                  text: project.gitLink,
-                  style: TextStyle(color: Colors.purple),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => {launch(project.gitLink)}),
-            )
-          ],
-        )
-      ])));
+        child: Column(children: <Widget>[
+          ListTile(
+              leading:
+                  Icon(IconData(project.icon, fontFamily: "MaterialIcons")),
+              title: Text(
+                project.name,
+                style: boldText,
+              ),
+              subtitle: Text(
+                project.description,
+                style: normalText,
+              )),
+          Row(children: [Text("Languages used: "), ...languageChips]),
+          Row(children: [Text("APIs used: "), ...apiChips.take(3)]),
+          Row(
+            children: [
+              Text('Github: '),
+              RichText(
+                text: TextSpan(
+                    text: project.gitLink,
+                    style: TextStyle(color: Colors.blue[700]),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => {launch(project.gitLink)}),
+              )
+            ],
+          )
+        ]),
+        color: Colors.white, //Theme.of(context).primaryColorLight,
+      ));
     }
     projectsSliver =
         SliverList(delegate: SliverChildListDelegate([...projectCards]));
+    //
+    //Job Section: Chips, Cards, Sliver
+    //
     for (var rawJob in myJobs) {
       Job job = Job.fromJson(rawJob);
       jobCards.add(Card(
-          child: Column(children: <Widget>[
-        ListTile(title: Text(job.name), subtitle: Text(job.dates)),
-        Column(children: [
-          ...job.details.map(
-              (e) => Align(alignment: Alignment.centerLeft, child: Text(e)))
+        child: Column(children: <Widget>[
+          ListTile(
+              title: Text(
+                job.name,
+                style: boldText,
+              ),
+              subtitle: Text(job.dates)),
+          Column(children: [
+            ...job.details.map((e) => Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "-" + e,
+                  style: normalText,
+                )))
+          ]),
         ]),
-      ])));
+        color: Colors.white, //Theme.of(context).primaryColorLight,
+      ));
     }
     jobsSliver = SliverList(delegate: SliverChildListDelegate([...jobCards]));
+
+    //Scaffold of all the slivers
     return Scaffold(
-        backgroundColor: Colors.blue[50],
+        backgroundColor: Theme.of(context)
+            .primaryColor, //Theme.of(context).primaryColorDark,
         body: CustomScrollView(
             physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics()),
             slivers: [
               nameSliver,
-              SliverAppBar(title: Text("Projects")),
+              sliverSeperator("Projects"),
               projectsSliver,
-              SliverAppBar(title: Text("Jobs")),
+              sliverSeperator("Jobs"),
               jobsSliver,
-              SliverAppBar(title: Text("More Information")),
+              sliverSeperator("More Information"),
               informationSliver
             ]));
   }
@@ -141,7 +204,7 @@ List myProjects = [
   {
     "name": "Portfolio",
     "description": "This is the site you're looking at!",
-    "gitLink": "",
+    "gitLink": "https://github.com/drewscreations/drewscreations_site",
     "languages": "Dart, JavaScript",
     "apis": "Firebase, Flutter",
     "icon": 61580,
